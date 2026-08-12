@@ -1,6 +1,5 @@
 package io.github.danielnerys.icompras.pedidos.controller.mappers;
 
-
 import io.github.danielnerys.icompras.pedidos.controller.dto.ItemPedidoDTO;
 import io.github.danielnerys.icompras.pedidos.controller.dto.NovoPedidoDTO;
 import io.github.danielnerys.icompras.pedidos.model.ItemPedido;
@@ -17,12 +16,13 @@ import java.util.List;
 public interface PedidoMapper {
 
     ItemPedidoMapper ITEM_PEDIDO_MAPPER = Mappers.getMapper(ItemPedidoMapper.class);
+
     @Mapping(source = "itens", target = "itens", qualifiedByName = "mapItens")
     @Mapping(source = "dadosPagamento", target = "dadosPagamento")
     Pedido map(NovoPedidoDTO dto);
 
     @Named("mapItens")
-    default List<ItemPedido> mapItens(List<ItemPedidoDTO> dtos) {
+    default List<ItemPedido> mapItens(List<ItemPedidoDTO> dtos){
         return dtos.stream().map(ITEM_PEDIDO_MAPPER::map).toList();
     }
 
@@ -31,15 +31,16 @@ public interface PedidoMapper {
         pedido.setStatus(StatusPedido.REALIZADO);
         pedido.setDataPedido(LocalDateTime.now());
 
-        var total = calculartotal(pedido);
+        var total = calcularTotal(pedido);
 
         pedido.setTotal(total);
 
+        pedido.getItens().forEach(item -> item.setPedido(pedido));
     }
 
-    private static BigDecimal calculartotal(Pedido pedido) {
+    private static BigDecimal calcularTotal(Pedido pedido) {
         return pedido.getItens().stream().map(item ->
-            item.getValorUnitario().multiply(BigDecimal.valueOf(item.getQuantidade()))
+                item.getValorUnitario().multiply(BigDecimal.valueOf(item.getQuantidade()))
         ).reduce(BigDecimal.ZERO, BigDecimal::add).abs();
     }
 }

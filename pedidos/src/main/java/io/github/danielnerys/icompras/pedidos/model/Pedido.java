@@ -51,7 +51,7 @@ public class Pedido {
     @Transient
     private DadosPagamento dadosPagamento;
 
-    @OneToMany(mappedBy = "codigoPedido")
+    @OneToMany(mappedBy = "pedido")
     private List<ItemPedido> itens;
 
 }
